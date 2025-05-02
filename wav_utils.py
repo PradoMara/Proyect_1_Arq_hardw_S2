@@ -1,18 +1,20 @@
 import wave 
 import struct 
 
-def leer_archivo_wav(archivo):
-    with wave.open(archivo, "rb") as archivo_wave:
+
+def leer_archivo_wav(archivo_entrada):
+    with wave.open(archivo_entrada, "rb") as archivo_wave:
         parametros = archivo_wave.getparams() # obtiene n_canales, ancho_muestra, frecuencia_muestreo, n_frames, tipo_comp, nombre_comp
         frames = archivo_wave.readframes(parametros.nframes)
     return frames, parametros
+
 
 def extraer_canal_derecho(frames, parametros): 
     n_canales = parametros.nchannels
     ancho_muestra = parametros.sampwidth
     n_frames = parametros.nframes
 
-    canal_derecho = []	
+    canal_derecho = []
 
     for i in range(n_frames):
         offset = i * n_canales * ancho_muestra
@@ -30,7 +32,8 @@ def reducir_muestreo(muestras, factor_reduccion):
 
 def guardar_archivo_wav(archivo, muestras, frecuencia_muestreo):
     with wave.open(archivo, "wb") as wav:
-        wav.setnchannels(1)  # Mono
+        # Configurar el archivo de salida como mono
+        wav.setnchannels(1) 
         wav.setsampwidth(2) 
         wav.setframerate(frecuencia_muestreo)
 
