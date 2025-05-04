@@ -1,42 +1,46 @@
-import wave 
-import struct 
+import wave
+import struct
 
+class ProcesadorWav:
+    def __init__(self, archivo_entrada, archivo_salida, freq_original, freq_objetivo):
+        self.archivo_entrada = archivo_entrada
+        self.archivo_salida = archivo_salida
+        self.freq_original = freq_original
+        self.freq_objetivo = freq_objetivo
+        self.frames = None
+        self.parametros = None
+        self.muestras_derechas = []
 
-def leer_archivo_wav(archivo_entrada):
-    with wave.open(archivo_entrada, "rb") as archivo_wave:
-        parametros = archivo_wave.getparams() # obtiene n_canales, ancho_muestra, frecuencia_muestreo, n_frames, tipo_comp, nombre_comp
-        frames = archivo_wave.readframes(parametros.nframes)
-    return frames, parametros
+    def leer_archivo(self):
+        with wave.open(self.archivo_entrada, "rb") as wav:
+            self.parametros = wav.getparams()
+            self.frames = wav.readframes(self.parametros.nframes)
+        print(f"[INFO] Parámetros del WAV: {self.parametros}")
 
+    def extraer_canal_derecho(self):
+        n_canales = self.parametros.nchannels
+        ancho_muestra = self.parametros.sampwidth
+        n_frames = self.parametros.nframes
 
-def extraer_canal_derecho(frames, parametros): 
-    n_canales = parametros.nchannels
-    ancho_muestra = parametros.sampwidth
-    n_frames = parametros.nframes
+        for i in range(n_frames):
+            offset = i * n_canales * ancho_muestra
+            bytes_derecha = self.frames[offset + ancho_muestra : offset + 2 * ancho_muestra]
+            muestra = struct.unpack('<h', bytes_derecha)[0]
+            self.muestras_derechas.append(muestra)
 
-    canal_derecho = []
+    def invertir_muestras(self):
+        self.muestras_derechas = list(reversed(self.muestras_derechas))
 
-    for i in range(n_frames):
-        offset = i * n_canales * ancho_muestra
-        muestra_derecha_bytes = frames[offset + ancho_muestra: offset + 2 * ancho_muestra]
-        muestra_derecha = struct.unpack("<h", muestra_derecha_bytes)[0]
-        canal_derecho.append(muestra_derecha)
+    def reducir_muestreo(self):
+        factor = self.freq_original // self.freq_objetivo
+        self.muestras_derechas = self.muestras_derechas[::factor]
 
-    return canal_derecho
+    def guardar_archivo(self):
+        with wave.open(self.archivo_salida, "wb") as wav:
+            wav.setnchannels(1)  # Mono
+            wav.setsampwidth(2)  # 16 bits
+            wav.setframerate(self.freq_objetivo)
 
-def invertir_audio(muestras):
-    return list(reversed(muestras))
-
-def reducir_muestreo(muestras, factor_reduccion):
-    return muestras[::factor_reduccion]
-
-def guardar_archivo_wav(archivo, muestras, frecuencia_muestreo):
-    with wave.open(archivo, "wb") as wav:
-        # Configurar el archivo de salida como mono
-        wav.setnchannels(1) 
-        wav.setsampwidth(2) 
-        wav.setframerate(frecuencia_muestreo)
-
-        frames_codificados = b''.join(struct.pack('<h', muestra) for muestra in muestras)
-        wav.writeframes(frames_codificados)
-
+            frames_codificados = b''.join(struct.pack('<h', m) for m in self.muestras_derechas)
+            wav.writeframes(frames_codificados)
+        print(f"[INFO] Archivo procesado guardado como: {self.archivo_salida}")
