@@ -12,9 +12,9 @@ class ProcesadorWav:
         self.muestras_derechas = []
 
     def leer_archivo(self):
-        with wave.open(self.archivo_entrada, "rb") as wav:
-            self.parametros = wav.getparams()
-            self.frames = wav.readframes(self.parametros.nframes)
+        with wave.open(self.archivo_entrada, "rb") as wav: #rb == read binary
+            self.parametros = wav.getparams() #obtiene nframes, nchannels, sampwidth, framerate
+            self.frames = wav.readframes(self.parametros.nframes) 
         print(f"[INFO] Parámetros del WAV: {self.parametros}")
 
     def extraer_canal_derecho(self):
@@ -36,7 +36,7 @@ class ProcesadorWav:
         self.muestras_derechas = self.muestras_derechas[::factor]
 
     def guardar_archivo(self):
-        with wave.open(self.archivo_salida, "wb") as wav:
+        with wave.open(self.archivo_salida, "wb") as wav: #wb == write binary
             wav.setnchannels(1)  # Mono
             wav.setsampwidth(2)  # 16 bits
             wav.setframerate(self.freq_objetivo)

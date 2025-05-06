@@ -1,9 +1,11 @@
 from wav_utils import ProcesadorWav
 from config import *
 
-# Este script procesa un archivo de audio WAV estéreo extrayendo el canal derecho, invirtiendo su contenido temporal,
-# reduciendo su frecuencia de muestreo y guardando el resultado como un nuevo archivo mono. Los parámetros de entrada
-# y salida (archivos y frecuencias) están definidos en el archivo de configuración.
+# Este script procesa un archivo de audio WAV estéreo extrayendo el canal derecho, 
+# invirtiendo su contenido temporal,
+# reduciendo su frecuencia de muestreo y guardando el resultado como un nuevo archivo mono. 
+# Los parámetros de entrada
+# y salida (archivos y frecuencias) están definidos en el archivo de config.py
 
 
 def main():
